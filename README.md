@@ -10,7 +10,9 @@
 
 Для кожної посилки використовуються такі поля:
 
-```id;weightKg;city;deliveryDays;express```
+```text
+id;weightKg;city;deliveryDays;express
+```
 
 де:
 * `id` — ідентифікатор посилки;
