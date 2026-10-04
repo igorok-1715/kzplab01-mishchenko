@@ -1,7 +1,10 @@
 package ua.lpnu.kzp;
 
 import java.io.IOException;
+<<<<<<< HEAD
 import java.io.PrintStream;
+=======
+>>>>>>> ef26bf8c572efa256afd757b6ae51510f8a3b52f
 import java.nio.file.Path;
 import java.util.List;
 
@@ -18,6 +21,7 @@ public final class Main {
      * @param args аргументи командного рядка: --help, --version, --input, --output
      */
     public static void main(String[] args) {
+<<<<<<< HEAD
         run(args, System.out);
     }
 
@@ -28,11 +32,14 @@ public final class Main {
      * @param out потік для повідомлень і звіту
      */
     static void run(String[] args, PrintStream out) {
+=======
+>>>>>>> ef26bf8c572efa256afd757b6ae51510f8a3b52f
         Path input = Path.of("data", "input.csv");
         Path output = Path.of("out", "report.txt");
 
         for (int i = 0; i < args.length; i++) {
             if ("--help".equals(args[i])) {
+<<<<<<< HEAD
                 out.printf("Використання: java -jar lab01.jar [--help] [--version] "
                         + "[--input <файл>] [--output <файл>]%n");
                 return;
@@ -54,16 +61,37 @@ public final class Main {
             } else {
                 out.printf("Невідомий параметр: %s%n", args[i]);
                 return;
+=======
+                System.out.printf("Використання: java -jar lab01.jar [--help] [--version] "
+                        + "[--input <файл>] [--output <файл>]%n");
+                return;
+            } else if ("--version".equals(args[i])) {
+                System.out.printf("lab01 %s%n", version());
+                return;
+            } else if ("--input".equals(args[i]) && i + 1 < args.length) {
+                i++;
+                input = Path.of(args[i]);
+            } else if ("--output".equals(args[i]) && i + 1 < args.length) {
+                i++;
+                output = Path.of(args[i]);
+>>>>>>> ef26bf8c572efa256afd757b6ae51510f8a3b52f
             }
         }
 
         try {
             List<String> lines = FileReport.readLines(input);
             String report = ParcelReport.buildReport(lines);
+<<<<<<< HEAD
             out.print(report);
             FileReport.writeReport(output, report);
         } catch (IOException e) {
             out.printf("Помилка файлу: %s%n", e.getMessage());
+=======
+            System.out.print(report);
+            FileReport.writeReport(output, report);
+        } catch (IOException e) {
+            System.out.printf("Помилка файлу: %s%n", e.getMessage());
+>>>>>>> ef26bf8c572efa256afd757b6ae51510f8a3b52f
         }
     }
 

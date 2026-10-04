@@ -3,5 +3,8 @@
 *.png binary
 *.jpg binary
 *.ps1 text eol=crlf
+<<<<<<< HEAD
 *.cmd text eol=crlf
 mvnw text eol=lf
+=======
+>>>>>>> ef26bf8c572efa256afd757b6ae51510f8a3b52f

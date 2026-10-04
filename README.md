@@ -60,6 +60,7 @@ java -jar target/lab01-1.0.0.jar --input data/input.csv --output out/report.txt
 Рядок 8: express має бути true або false
 ```
 
+<<<<<<< HEAD
 ## Рівень 2 — інженерний
 - Maven-проєкт (`pom.xml`) з Maven Wrapper (`mvnw`, `mvnw.cmd`).
 - Залежність JUnit 5 підтягується Maven; тести: `ParcelReportTest`, `MainTest`.
@@ -69,8 +70,13 @@ java -jar target/lab01-1.0.0.jar --input data/input.csv --output out/report.txt
   дефекти пов'язуються з виправленнями через `Closes #N`.
 - CI: `.github/workflows/ci.yml` (Ubuntu, Windows, macOS).
 
+=======
+>>>>>>> ef26bf8c572efa256afd757b6ae51510f8a3b52f
 ## Структура
 - `Main` — розбір аргументів і запуск.
 - `FileReport` — читання/запис файлів (UTF-8, `Path`).
 - `ParcelReport` — перевірка записів, обчислення, текст звіту.
+<<<<<<< HEAD
 - `ParcelReportTest`, `MainTest` — тести JUnit 5 (`src/test/java`).
+=======
+>>>>>>> ef26bf8c572efa256afd757b6ae51510f8a3b52f
