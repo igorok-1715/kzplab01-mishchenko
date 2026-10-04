@@ -95,7 +95,7 @@ java -cp target/classes ua.lpnu.kzp.Main --version
 
 ## Запуск executable JAR
 Після виконання:
-```bash
+```text
 ./mvnw -B clean package
 ```
 програму можна запустити командою:
