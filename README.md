@@ -67,7 +67,7 @@ TRK-005;-1.0;Dnipro;1;true
 mvnw.cmd -B clean verify
 ```
 
-## Запуск програми
+### Запуск програми
 Після компіляції:
 ```bash
 java -cp target/classes ua.lpnu.kzp.Main
@@ -93,7 +93,7 @@ java -cp target/classes ua.lpnu.kzp.Main --help
 java -cp target/classes ua.lpnu.kzp.Main --version
 ```
 
-### Запуск executable JAR
+## Запуск executable JAR
 Після виконання:
 ```bash
 ./mvnw -B clean package
