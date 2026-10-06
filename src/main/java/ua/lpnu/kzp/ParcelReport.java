@@ -52,6 +52,10 @@ public final class ParcelReport {
             try {
                 double weight = Double.parseDouble(f[1]);
                 int days = Integer.parseInt(f[3]);
+                if (Double.isNaN(weight) || Double.isInfinite(weight)) {
+                errors.add("Рядок %d: числове поле має помилковий формат".formatted(n));
+                continue;
+                }
                 if (weight < 0 || days < 0) {
                     errors.add("Рядок %d: від'ємне числове значення".formatted(n));
                     continue;
