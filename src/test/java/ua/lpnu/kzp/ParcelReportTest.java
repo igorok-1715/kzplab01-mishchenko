@@ -78,4 +78,17 @@ class ParcelReportTest {
         String r = ParcelReport.buildReport(List.of("P009;1.0;Івано-Франківськ;1;false"));
         assertTrue(r.contains("Коректних записів: 1"));
     }
+    
+       @Test
+       void nanWeightIsRejected() {
+           String r = ParcelReport.buildReport(List.of("P010;NaN;Львів;2;false"));
+           assertTrue(r.contains("Коректних записів: 0"));
+           assertTrue(r.contains("числове поле має помилковий формат"));
+       }
+
+       @Test
+       void infinityWeightIsRejected() {
+           String r = ParcelReport.buildReport(List.of("P011;Infinity;Львів;2;false"));
+           assertTrue(r.contains("Коректних записів: 0"));
+       }
 }
