@@ -96,16 +96,17 @@ data/input.csv
 
 ## 6. GitHub Issues і Pull Request
 
-| Issue | Назва | Мітка | Зміна |
-|-------|-------|-------|-------|
-| #1 | Налаштування лабораторної роботи № 1 | infra | структура репозиторію |
-| #2 | Реалізувати читання й перевірку записів | feature | `Main`, `FileReport`, `ParcelReport` |
-| #3 | Сформувати консольний і файловий звіт | feature | `buildReport`, `--output` |
-| #4 | Додати документацію | docs | README, REPORT, javadoc |
-| #5 | Налаштувати Maven-проєкт і Wrapper | infra | `pom.xml`, `mvnw` |
-| #6 | Налаштувати SpotBugs і виконуваний JAR | infra | SpotBugs, shade |
-| #7 | Додати тести JUnit 5 | feature | `ParcelReportTest` |
-| #8 | Налаштувати GitHub Actions на трьох ОС | infra | `ci.yml`, артефакти |
+## 6. GitHub Issues і Pull Request
+
+| Issue | Назва | Мітка | Зміна | Pull Request |
+|-------|-------|-------|-------|--------------|
+| #5 | Налаштувати Maven-проєкт і Wrapper | infra | `pom.xml`, `mvnw` | #12 |
+| #6 | Налаштувати SpotBugs і виконуваний JAR | infra | SpotBugs, shade | #12 |
+| #7 | Додати тести JUnit 5 | feature | `ParcelReportTest`, `MainTest` | #14 |
+| #8 | Налаштувати GitHub Actions на трьох ОС | infra | `ci.yml`, артефакти | #12 |
+| #9 | Дефект: NaN та Infinity у weightKg вважаються коректним записом | bug | `ParcelReport`, 2 тести | #14 |
+| #10 | Додати шаблони Issues і PR, ролі ШІ | docs | `.github/`, `ai/` | #13 |
+| #11 | Оновити README для рівня 2 | docs | `README.md` | #15 |
 
 Номери Issues та посилання на Pull Request потрібно звірити з реальними на GitHub. Зміни пов'язуються з Issues через `Closes #N` в описі PR.
 
@@ -118,6 +119,14 @@ data/input.csv
 | Add project README | `README.md` |
 | Add lab01 report | `REPORT.md` |
 
+**Історія комітів (рівень 2):**
+
+| Коміт | Зміст |
+|-------|-------|
+| Add Maven Wrapper | `mvnw`, `mvnw.cmd`, `.mvn/wrapper/` (PR #12) |
+| Add AI role description files | `ai/manager.md`, `ai/devops.md` (PR #13) |
+| Reject NaN and Infinity in weightKg | виправлення в `ParcelReport.java`, тести в `ParcelReportTest.java` (PR #14) |
+| Update README for level 2 | `README.md` (PR #15) |
 ## 7. Приклади роботи
 
 **Вхідні дані** (`data/input.csv`):
