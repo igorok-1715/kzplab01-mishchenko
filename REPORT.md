@@ -126,6 +126,18 @@ data/input.csv
 | Reject NaN and Infinity in weightKg | виправлення в `ParcelReport.java`, тести в `ParcelReportTest.java` (PR #14) |
 | Update README for level 2 | `README.md` (PR #15) |
 
+## Рівень 3 — повний цикл
+
+| Вимога | Як виконано |
+|--------|-------------|
+| `verify` на ubuntu-latest, windows-latest, macos-latest | `.github/workflows/ci.yml`, матриця з трьох ОС, команда `./mvnw -B clean verify` |
+| Тести виконуються на всіх трьох ОС | у кожному завданні CI: `Tests run: 19, Failures: 0, Errors: 0` |
+| JAR публікується як артефакт workflow | крок `Upload JAR`, три артефакти `jar-<ОС>-<номер>` |
+| Версія в `pom.xml`, тег `v1.0.0`, вивід `--version` | `<version>1.0.0</version>`, тег `v1.0.0`, `java -jar target/lab01-1.0.0.jar --version` виводить `lab01 1.0.0` |
+| CI перевіряє не лише компіляцію | `verify` виконує тести, SpotBugs і пакування; окремі кроки перевіряють вивід `--version` та відповідність тега версії |
+
+Посилення CI виконано в Issue #17 (Pull Request #19), реліз підготовлено в Issue #18 (Pull Request #20). CHANGELOG описує зміни версії 1.0.0.
+
 ## 7. Приклади роботи
 
 **Вхідні дані** (`data/input.csv`):
