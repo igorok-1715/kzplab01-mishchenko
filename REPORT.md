@@ -769,3 +769,39 @@ v2.0.0 (створити після об'єднання PR)
 Додано Builder, розширено тестування,
 оновлено версію програми та збережено
 сумісність із попередніми лабораторними роботами.
+
+
+### Результати GitHub Actions для v2.0.0
+
+Версія програми: 2.0.0
+
+Git-тег: v2.0.0
+
+Результат CI: SUCCESS
+
+Успішно виконано 3 збірки:
+- Ubuntu — Success
+- Windows — Success
+- macOS — Success
+
+Опубліковано 3 JAR artifacts:
+- jar-ubuntu-latest-34
+- jar-windows-latest-34
+- jar-macos-latest-34
+
+Посилання на успішний CI:
+https://github.com/igorok-1715/kzplab01-mishchenko/actions/runs/43726664989
+
+Посилання на artifacts:
+(https://github.com/igorok-1715/kzplab01-mishchenko/actions/runs/43726664989)
+
+### Підсумок рефакторингу
+
+| Показник | До | Після |
+|---|---|---|
+| Версія | 1.0.0 | 2.0.0 |
+| Кількість тестів | 42 | 50 |
+| Помилки тестів | 0 | 0 |
+| Дефекти SpotBugs | 0 | 0 |
+| Parcel.Builder | Немає | Реалізовано |
+| Незмінність Parcel | Так | Так |
