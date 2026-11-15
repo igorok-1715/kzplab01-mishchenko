@@ -362,4 +362,35 @@ data/input.csv
 | розбір і перевірка в `buildReport` | розбір у `fromCsv`, перевірка в конструкторі |
 | хибний рядок — гілка `if/continue` | хибний рядок — `IllegalArgumentException` |
 
-Зовнішня поведінка збережена: формат входу, тексти повідомлень і звіт не змінилися.
+## Лабораторна робота №2 — рівень 2 (інженерний)
+
+**Варіант 15 — Доставлення посилок**
+
+Для інженерного рівня розширено автоматизоване
+тестування класів Parcel, ParcelReport та WeightDelivery.
+
+### Результати перевірки
+
+- JUnit 5: 42 успішні тести.
+- Нових тестів: 8.
+- Maven verify: BUILD SUCCESS.
+- SpotBugs: 0 дефектів.
+- Виконуваний JAR: lab01-1.0.0.jar.
+- Збережено сумісність із лабораторною №1.
+
+### Команди запуску
+
+```powershell
+.\mvnw.cmd clean test
+.\mvnw.cmd clean verify
+java -jar target\lab01-1.0.0.jar --version
+java -jar target\lab01-1.0.0.jar --input data\input.csv --output out\report.txt
+```
+
+### GitHub
+
+Розробка інженерного рівня виконується
+в окремій гілці feature/lab2-engineering.
+
+Зміни оформлюються через GitHub Issue
+та Pull Request.
