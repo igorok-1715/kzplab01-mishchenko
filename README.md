@@ -394,3 +394,34 @@ java -jar target\lab01-1.0.0.jar --input data\input.csv --output out\report.txt
 
 Зміни оформлюються через GitHub Issue
 та Pull Request.
+
+
+## Лабораторна робота №2 — рівень 3
+
+**Варіант 15 — Доставлення посилок**
+
+### Реалізовано
+
+- Додано вкладений клас `Parcel.Builder`.
+- Builder створює об'єкти через основний конструктор `Parcel`.
+- Збережено незмінність класу `Parcel`.
+- Додано 8 нових JUnit 5 тестів.
+- Загалом успішно проходять 50 тестів.
+- Версію програми оновлено до 2.0.0.
+- Maven Shade Plugin створює виконуваний JAR.
+- SpotBugs не виявив дефектів.
+- GitHub Actions налаштовано для Windows, Ubuntu та macOS.
+- Налаштовано завантаження JAR як артефакту.
+
+### Перевірка
+
+```powershell
+.\mvnw.cmd clean verify
+java -jar target\lab01-2.0.0.jar --version
+```
+
+Результат локальної перевірки:
+- 50 тестів, 0 помилок.
+- SpotBugs: 0 дефектів.
+- BUILD SUCCESS.
+- Версія: lab01 2.0.0.

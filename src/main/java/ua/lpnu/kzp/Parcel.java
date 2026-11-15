@@ -138,4 +138,51 @@ public final class Parcel {
                 "Parcel{id=%s, weightKg=%.2f, city=%s, deliveryDays=%d, express=%b}",
                 id, weightKg, city, deliveryDays, express);
     }
+
+    /**
+     * Builder для створення об'єкта Parcel.
+     * Перевірка даних виконується основним конструктором.
+     */
+    public static final class Builder {
+        private String id;
+        private Double weightKg;
+        private String city;
+        private Integer deliveryDays;
+        private boolean express;
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder weightKg(double weightKg) {
+            this.weightKg = weightKg;
+            return this;
+        }
+
+        public Builder city(String city) {
+            this.city = city;
+            return this;
+        }
+
+        public Builder deliveryDays(int deliveryDays) {
+            this.deliveryDays = deliveryDays;
+            return this;
+        }
+
+        public Builder express(boolean express) {
+            this.express = express;
+            return this;
+        }
+
+        public Parcel build() {
+            if (weightKg == null || deliveryDays == null) {
+                throw new IllegalArgumentException(
+                        "Не вказано вагу або термін доставки");
+            }
+
+            return new Parcel(
+                    id, weightKg, city, deliveryDays, express);
+        }
+    }
 }
