@@ -329,99 +329,300 @@ data/input.csv
 ```text
 1.0.0
 ```
-## Об'єктна модель (лабораторна № 2)
 
-Запис про посилку представлено незмінним класом `Parcel` замість рядків і паралельних
-змінних. Розбір CSV-рядка виконує статичний метод `Parcel.fromCsv`, а правила коректності
-перевіряє конструктор. Допоміжне незмінне значення — `record WeightDelivery`.
-Формат входу та текст звіту збігаються з лабораторною № 1.
+## Лабораторна робота № 2
 
-| Клас | Призначення |
-|------|-------------|
-| `Parcel` | незмінна сутність: поля, інваріанти в конструкторі, `fromCsv`, `toString` |
-| `WeightDelivery` | `record` (вага й термін однієї посилки) |
-| `ParcelReport` | збирає `Parcel`, обчислює показники, формує текст звіту |
-| `FileReport` | читання й запис файлів (`Path`, UTF-8) |
-| `Main` | розбір аргументів командного рядка |
+**Поточна версія:** 2.0.0.
 
-### Правила коректності (інваріанти)
+**Варіант:** № 15 · **Предметна область:** доставлення посилок
 
-- `id` і `city` не порожні;
-- `weightKg` — скінченне число (без NaN та Infinity), не менше 0;
+У лабораторній роботі № 2 виконано перехід від рядкового представлення даних до об’єктної моделі. Формат вхідного CSV та текст звіту збігаються з лабораторною № 1.
+
+### Основні класи
+
+#### Parcel
+
+Основна сутність:
+
+```java
+Parcel
+```
+
+Поля:
+
+```java
+private final String id;
+private final double weightKg;
+private final String city;
+private final int deliveryDays;
+private final boolean express;
+```
+
+Особливості:
+
+- клас `final`;
+- поля `private final`;
+- setter-и відсутні;
+- валідація виконується в конструкторі;
+- `NaN`, `Infinity` і `-Infinity` не допускаються;
+- для перевірки ваги використовується `Double.isFinite()`.
+
+Правила коректності:
+
+- `id` і `city` не `null` і не порожні;
+- `weightKg` — скінченне число, не менше 0;
 - `deliveryDays` не менше 0;
 - `express` — лише `true` або `false` (перевіряє `fromCsv`).
 
-Порушення правила дає `IllegalArgumentException`, і об'єкт не створюється. Об'єкт
-`Parcel` не має setter-ів і після створення не змінюється.
+Створення з CSV:
 
-### Що змінилося порівняно з лабораторною № 1
-
-| Лабораторна № 1 | Лабораторна № 2 |
-|-----------------|-----------------|
-| рядки й паралельні змінні | список об'єктів `Parcel` |
-| розбір і перевірка в `buildReport` | розбір у `fromCsv`, перевірка в конструкторі |
-| хибний рядок — гілка `if/continue` | хибний рядок — `IllegalArgumentException` |
-
-## Лабораторна робота №2 — рівень 2 (інженерний)
-
-**Варіант 15 — Доставлення посилок**
-
-Для інженерного рівня розширено автоматизоване
-тестування класів Parcel, ParcelReport та WeightDelivery.
-
-### Результати перевірки
-
-- JUnit 5: 42 успішні тести.
-- Нових тестів: 8.
-- Maven verify: BUILD SUCCESS.
-- SpotBugs: 0 дефектів.
-- Виконуваний JAR: lab01-1.0.0.jar.
-- Збережено сумісність із лабораторною №1.
-
-### Команди запуску
-
-```powershell
-.\mvnw.cmd clean test
-.\mvnw.cmd clean verify
-java -jar target\lab01-1.0.0.jar --version
-java -jar target\lab01-1.0.0.jar --input data\input.csv --output out\report.txt
+```java
+Parcel.fromCsv(String line)
 ```
 
-### GitHub
+Формат CSV:
 
-Розробка інженерного рівня виконується
-в окремій гілці feature/lab2-engineering.
+```text
+id;weightKg;city;deliveryDays;express
+```
 
-Зміни оформлюються через GitHub Issue
-та Pull Request.
+#### WeightDelivery
 
+Допоміжне незмінне значення:
 
-## Лабораторна робота №2 — рівень 3
+```java
+record WeightDelivery(double weightKg, int deliveryDays)
+```
 
-**Варіант 15 — Доставлення посилок**
+Record використовується під час обчислення середньої ваги та найбільшого терміну доставлення. Метод `Parcel.toWeightDelivery()` повертає це значення.
 
-### Реалізовано
+### Порівняння Lab 1 і Lab 2
 
-- Додано вкладений клас `Parcel.Builder`.
-- Builder створює об'єкти через основний конструктор `Parcel`.
-- Збережено незмінність класу `Parcel`.
-- Додано 8 нових JUnit 5 тестів.
-- Загалом успішно проходять 50 тестів.
-- Версію програми оновлено до 2.0.0.
-- Maven Shade Plugin створює виконуваний JAR.
-- SpotBugs не виявив дефектів.
-- GitHub Actions налаштовано для Windows, Ubuntu та macOS.
-- Налаштовано завантаження JAR як артефакту.
+| Характеристика | Lab 1 | Lab 2 |
+| --- | --- | --- |
+| Представлення запису | рядок та окремі змінні | `Parcel` |
+| Розбір CSV | у `ParcelReport.buildReport()` | `Parcel.fromCsv()` |
+| Валідація | у циклі обробки | у конструкторі |
+| Дані | окремі значення | `List<Parcel>` |
+| Допоміжні значення | окремі змінні | `WeightDelivery` |
+| Перевірка NaN / Infinity | як помилковий числовий формат | `Double.isFinite()` |
+| Створення об’єкта | — | конструктор + Builder |
+| Кількість тестів | 19 | 50 |
+| Версія | 1.0.0 | 2.0.0 |
+| JAR | `lab01-1.0.0.jar` | `lab01-2.0.0.jar` |
 
-### Перевірка
+### Результати
 
-```powershell
+Для контрольного набору даних `data/input.csv`:
+
+```text
+Коректних записів: 3
+Середня вага: 4.43 кг
+Найбільший термін: 4 дн.
+Експрес-доставлень: 2
+Помилок: 5
+```
+
+Результати Lab 1 і Lab 2 однакові, тому зовнішня поведінка програми після рефакторингу збережена.
+
+### Тестування
+
+Запуск:
+
+```text
+.\mvnw.cmd test
+```
+
+Результат:
+
+```text
+Tests run: 50, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+| Тестовий клас | Тестів |
+| --- | ---: |
+| `MainTest` | 7 |
+| `ParcelReportTest` | 12 |
+| `ParcelTest` | 15 |
+| `ParcelEngineeringTest` | 8 |
+| `ParcelBuilderTest` | 8 |
+| **Разом** | **50** |
+
+Тести `MainTest` і `ParcelReportTest` (разом 19) залишились із лабораторної № 1 і проходять разом із новими.
+
+Перевіряються:
+
+- коректні та граничні значення;
+- `null` і blank;
+- від’ємні значення;
+- `NaN`;
+- `Infinity`;
+- `-Infinity`;
+- `fromCsv()`;
+- `WeightDelivery`;
+- коди завершення програми;
+- створення об’єкта через Builder;
+- валідація під час використання Builder.
+
+### Maven і SpotBugs
+
+Повна перевірка:
+
+```text
 .\mvnw.cmd clean verify
+```
+
+Результат:
+
+```text
+BugInstance size is 0
+Error size is 0
+No errors/warnings found
+BUILD SUCCESS
+```
+
+### Незмінність і Builder 
+
+`Parcel` є повністю незмінним:
+
+- клас `final`;
+- поля `private final`;
+- setter-и відсутні.
+
+Для зручного створення об’єктів додано `Parcel.Builder`.
+
+Приклад:
+
+```java
+Parcel parcel = Parcel.builder()
+        .id("P001")
+        .weightKg(2.5)
+        .city("Львів")
+        .deliveryDays(2)
+        .express(true)
+        .build();
+```
+
+Метод `build()` викликає основний конструктор `Parcel`, тому Builder не обходить валідацію. `ParcelBuilderTest` містить 8 тестів: коректне створення, відхилення некоректних значень, відхилення відсутніх обов’язкових полів, збереження правил валідації.
+
+### JAR
+
+Поточний JAR:
+
+```text
+target/lab01-2.0.0.jar
+```
+
+Перевірка версії:
+
+```text
 java -jar target\lab01-2.0.0.jar --version
 ```
 
-Результат локальної перевірки:
-- 50 тестів, 0 помилок.
-- SpotBugs: 0 дефектів.
-- BUILD SUCCESS.
-- Версія: lab01 2.0.0.
+Результат:
+
+```text
+lab01 2.0.0
+```
+
+Запуск програми:
+
+```text
+java -jar target\lab01-2.0.0.jar --input data\input.csv --output out\report.txt
+```
+
+### GitHub Actions
+
+CI запускається на трьох ОС:
+
+| ОС | Результат |
+| --- | --- |
+| Ubuntu | Success |
+| Windows | Success |
+| macOS | Success |
+
+У workflow:
+
+- запускається Maven `verify`;
+- виконуються автоматизовані тести;
+- запускається SpotBugs;
+- перевіряється версія;
+- JAR публікується як artifact.
+
+Успішний workflow:
+
+https://github.com/igorok-1715/kzplab01-mishchenko/actions/runs/43726664989
+
+Опубліковано 3 artifacts.
+
+### GitHub Issues
+
+| Issue | Зміст |
+| --- | --- |
+| #23 | `Parcel` і `fromCsv` |
+| #24 | `WeightDelivery` |
+| #25 | тести `Parcel` і `WeightDelivery` |
+| #27 | README і REPORT |
+| #30 | `Parcel.Builder` і реліз 2.0.0 |
+
+### Pull Request
+
+| Pull Request | Зміст |
+| --- | --- |
+| #28 | `Parcel`, `fromCsv`, `WeightDelivery`, тести, документація |
+| #29 | інженерний рівень і додаткові тести |
+| #31 | `Parcel.Builder` і реліз 2.0.0 |
+| #32 | уточнення звіту |
+
+Фінальний Pull Request:
+
+https://github.com/igorok-1715/kzplab01-mishchenko/pull/31
+
+CI на Pull Request успішно пройшов на Ubuntu, Windows і macOS.
+
+### Структура Lab 2
+
+```text
+src/
+├── main/java/ua/lpnu/kzp/
+│   ├── Main.java
+│   ├── FileReport.java
+│   ├── ParcelReport.java
+│   ├── Parcel.java
+│   └── WeightDelivery.java
+└── test/java/ua/lpnu/kzp/
+    ├── MainTest.java
+    ├── ParcelReportTest.java
+    ├── ParcelTest.java
+    ├── ParcelEngineeringTest.java
+    └── ParcelBuilderTest.java
+```
+
+### Підсумок
+
+У Lab 2:
+
+- створено `Parcel`;
+- додано `fromCsv()`;
+- реалізовано `WeightDelivery`;
+- валідацію перенесено до предметної моделі;
+- додано перевірку скінченних чисел;
+- `Parcel` залишено повністю незмінним;
+- реалізовано `Parcel.Builder`;
+- Builder не обходить валідацію конструктора;
+- кількість тестів збільшено з 19 до 50;
+- SpotBugs не знаходить дефектів;
+- CI проходить на Ubuntu, Windows і macOS;
+- версію оновлено до 2.0.0;
+- JAR публікується як artifact.
+
+Git-тег фінальної версії:
+
+```text
+v2.0.0
+```
+
+Посилання:
+
+https://github.com/igorok-1715/kzplab01-mishchenko/tree/v2.0.0
