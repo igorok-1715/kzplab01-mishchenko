@@ -330,7 +330,6 @@ data/input.csv
 1.0.0
 ```
 
-
 # Лабораторна робота №2
 
 **Рефакторинг Java-проєкту та перехід до об'єктної моделі**
@@ -724,3 +723,225 @@ https://github.com/igorok-1715/kzplab01-mishchenko/tree/v2.0.0
 **Репозиторій проєкту:**
 
 https://github.com/igorok-1715/kzplab01-mishchenko
+
+# Лабораторна робота №3
+
+Поточна версія: 3.0.0.
+
+Варіант: №15  
+Предметна область: доставлення посилок.
+
+У Lab 3 модель розширено за допомогою успадкування, enum і поліморфізму.
+
+## Основні зміни
+
+Створено ієрархію:
+
+```text
+Parcel
+├── RegularParcel
+└── ExpressParcel
+```
+
+Parcel став абстрактним базовим класом і містить спільні поля та валідацію.
+
+RegularParcel і ExpressParcel є різновидами Parcel (is-a), тому для них використано успадкування.
+
+Підтипи мають власні правила:
+
+- RegularParcel — вартість доставлення обчислюється за формулою `50.0 + weightKg * 10.0`, термін залишається незмінним;
+- ExpressParcel — вартість доставлення обчислюється за формулою `100.0 + weightKg * 20.0`, термін скорочується на один день, але не нижче нуля.
+
+Додано enum:
+
+```java
+DeliveryKind
+```
+
+зі значеннями:
+
+```text
+REGULAR
+EXPRESS
+```
+
+## Поліморфізм
+
+У базовому класі оголошено:
+
+```java
+public abstract DeliveryKind getDeliveryKind();
+public abstract int calculateDeliveryTime();
+public abstract double calculateDeliveryCost();
+```
+
+Підтипи мають різні реалізації цих методів.
+
+Об'єкти зберігаються у:
+
+```java
+List<Parcel>
+```
+
+і обробляються через:
+
+```java
+parcel.calculateDeliveryTime();
+parcel.calculateDeliveryCost();
+```
+
+без if або switch за конкретним підтипом.
+
+## equals() і hashCode()
+
+Реалізовано логічну рівність об'єктів через:
+
+```java
+equals()
+hashCode()
+```
+
+Рівність перевірено за допомогою:
+
+```java
+HashSet<Parcel>
+```
+
+Рівні об'єкти не створюють дублікати у HashSet.
+
+## Порівняння Lab 2 і Lab 3
+
+| Характеристика | Lab 2 | Lab 3 |
+|---|---|---|
+| Базова модель | Один Parcel | Абстрактний Parcel |
+| Типи посилок | Один клас | RegularParcel, ExpressParcel |
+| Категорія | boolean express | DeliveryKind |
+| Розрахунок вартості | Окремий метод відсутній | Поліморфний calculateDeliveryCost() |
+| Розрахунок терміну | deliveryDays | calculateDeliveryTime() |
+| Обробка | List<Parcel> | List<Parcel> з різними підтипами |
+| Рівність | Стандартна Object | equals() + hashCode() |
+| Перевірка колекції | Не використовувалась | HashSet |
+| Кількість тестів | 50 | 79 |
+| Версія | 2.0.0 | 3.0.0 |
+| JAR | lab01-2.0.0.jar | lab01-3.0.0.jar |
+
+## Сумісність із Lab 2
+
+Формат CSV не змінено:
+
+```text
+id;weightKg;city;deliveryDays;express
+```
+
+Контрольний результат також залишився без змін:
+
+```text
+Кількість коректних записів: 3
+Кількість некоректних записів: 5
+Середня вага посилок: 4.43 кг
+Найбільший термін доставлення: 4 дні
+Кількість експрес-доставлень: 2
+```
+
+## Тестування
+
+Запуск:
+
+```powershell
+.\mvnw.cmd test
+```
+
+Результат:
+
+```text
+Tests run: 79, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+Повна перевірка:
+
+```powershell
+.\mvnw.cmd verify
+```
+
+SpotBugs:
+
+```text
+BugInstance size is 0
+Error size is 0
+BUILD SUCCESS
+```
+
+## JAR
+
+Створення:
+
+```powershell
+.\mvnw.cmd package
+```
+
+Поточний JAR:
+
+```text
+target/lab01-3.0.0.jar
+```
+
+Перевірка версії:
+
+```powershell
+java -jar target\lab01-3.0.0.jar --version
+```
+
+Результат:
+
+```text
+lab01 3.0.0
+```
+
+## Додаткове завдання ⭐ — sealed-ієрархія
+
+Базовий тип оголошено як sealed:
+
+```java
+public abstract sealed class Parcel
+        permits RegularParcel, ExpressParcel
+```
+
+Тому безпосередніми підтипами можуть бути лише:
+
+```text
+RegularParcel
+ExpressParcel
+```
+
+Обидва підтипи оголошено як final.
+
+Для демонстрації вичерпної перевірки використано pattern matching у switch:
+
+```java
+return switch (parcel) {
+    case RegularParcel regular -> "Звичайне доставлення";
+    case ExpressParcel express -> "Експрес-доставлення";
+};
+```
+
+Гілка default не потрібна, оскільки компілятор знає повний перелік дозволених підтипів.
+
+Switch не дублює логіку calculateDeliveryTime() та calculateDeliveryCost(): він використовується лише для визначення конкретного типу посилки та повернення його текстового опису.
+
+Для sealed-ієрархії додано окремі тести. Загальна кількість тестів — 79.
+
+## Підсумок
+
+У Lab 3:
+
+- створено абстрактний Parcel;
+- додано RegularParcel і ExpressParcel;
+- додано DeliveryKind;
+- реалізовано поліморфні calculateDeliveryTime() і calculateDeliveryCost();
+- реалізовано equals() і hashCode();
+- рівність перевірено через HashSet;
+- реалізовано sealed-ієрархію та pattern matching switch;
+- кількість тестів збільшено до 79;
+- збережено результати попередньої роботи;
+- версію оновлено до 3.0.0.

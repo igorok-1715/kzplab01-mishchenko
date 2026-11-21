@@ -7,7 +7,7 @@ import java.util.Objects;
  * Базовий клас посилки.
  * Підтримує звичайне та експрес-доставлення.
  */
-public sealed class Parcel
+public abstract sealed class Parcel
         permits RegularParcel, ExpressParcel {
 
     private static final int FIELD_COUNT = 5;
@@ -21,8 +21,8 @@ public sealed class Parcel
     /**
      * Створює посилку та перевіряє коректність даних.
      */
-    public Parcel(String id, double weightKg, String city,
-                  int deliveryDays, boolean express) {
+    protected Parcel(String id, double weightKg, String city,
+                 int deliveryDays, boolean express) {
 
         if (id == null || id.isBlank()
                 || city == null || city.isBlank()) {
@@ -51,7 +51,7 @@ public sealed class Parcel
      * Захист від перевизначення фіналізатора підтипами.
      */
     @Override
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings("removal")
     protected final void finalize() {
         // Фіналізація не використовується.
     }
@@ -123,30 +123,21 @@ public sealed class Parcel
         return express;
     }
 
-    /**
-     * Повертає вид доставлення.
-     */
-    public DeliveryKind getDeliveryKind() {
-        return express
-                ? DeliveryKind.EXPRESS
-                : DeliveryKind.REGULAR;
-    }
+   /**
+   * Повертає вид доставлення.
+   */
+   public abstract DeliveryKind getDeliveryKind();
 
-    /**
-     * Розраховує термін доставлення.
-     */
-    public int calculateDeliveryTime() {
-        return deliveryDays;
-    }
+   /**
+   * Розраховує термін доставлення.
+   */
+   public abstract int calculateDeliveryTime();
 
-    /**
-     * Розраховує вартість доставлення.
-     */
-    public double calculateDeliveryCost() {
-        return express
-                ? 100.0 + weightKg * 20.0
-                : 50.0 + weightKg * 10.0;
-    }
+   /**
+   * Розраховує вартість доставлення.
+   */
+   public abstract double calculateDeliveryCost();
+    
 
     /**
      * Перевіряє логічну рівність посилок.
