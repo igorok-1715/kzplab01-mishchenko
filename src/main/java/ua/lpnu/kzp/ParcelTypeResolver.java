@@ -1,9 +1,5 @@
 package ua.lpnu.kzp;
 
-import ua.lpnu.kzp.ExpressParcel;
-import ua.lpnu.kzp.Parcel;
-import ua.lpnu.kzp.RegularParcel;
-
 /**
  * Визначає конкретний тип посилки
  * за допомогою pattern matching switch.

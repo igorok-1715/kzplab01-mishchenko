@@ -1297,50 +1297,48 @@ actions/upload-artifact@v5
 
 Робота організована за допомогою GitHub Issues, окремих гілок та Pull Requests.
 
-| Issue / PR | Виконана робота |
-|---|---|
-| #38 — Pull Request | Базовий рівень, спадкування та поліморфізм |
-| #39 — Pull Request | Покращення назв CI-перевірок |
-| #40 — Issue | equals(), hashCode() та HashSet |
-| #41 — Issue | Інженерний рівень та автоматизовані тести |
-| #42 — Pull Request | Інженерний рівень |
-| #43 — Issue | Повний цикл CI та версія 3.0.0 |
-| #44 — Issue | Sealed-ієрархія та pattern matching switch |
-
-Під час роботи використовувалися окремі гілки:
+Гілки:
 
 ```text
 lab3-development
-lab3-ci-naming
 lab3-level2
 lab3-level3
 ```
 
-Для класифікації завдань використовувалися GitHub Labels:
+Pull Requests:
 
-- feature — реалізація нової функціональності;
-- infra — налаштування інфраструктури та CI;
-- docs — оновлення документації.
+```text
+#38 — Lab 3 Level 1: Parcel inheritance and polymorphism
+#39 — Lab 3: Improve CI workflow naming
+#42 — Lab 3 Level 2: Equality, hashCode and engineering tests
+```
 
-Посилання на репозиторій:
+Посилання:
 
-https://github.com/igorok-1715/kzplab01-mishchenko
+- https://github.com/igorok-1715/kzplab01-mishchenko/pull/38
+- https://github.com/igorok-1715/kzplab01-mishchenko/pull/39
+- https://github.com/igorok-1715/kzplab01-mishchenko/pull/42
 
-GitHub Issues:
+Виконано злиття гілок:
 
-https://github.com/igorok-1715/kzplab01-mishchenko/issues
+```text
+lab3-development -> main
+lab3-ci-naming -> main
+lab3-level2 -> main
+```
 
-GitHub Pull Requests:
+Для організації виконання лабораторної роботи використано GitHub Issues:
 
-https://github.com/igorok-1715/kzplab01-mishchenko/pulls
+```text
+#40 — Lab 3 Level 2: equals, hashCode and HashSet testing
+#41 — Lab 3 Level 2: Equality, hashCode and engineering tests
+#43 — Lab 3 Level 3: Full CI cycle and release 3.0.0
+#44 — Lab 3 Bonus: Sealed hierarchy and pattern matching switch
+```
 
-GitHub Actions:
+Після злиття Pull Requests автоматизовані перевірки GitHub Actions для об'єднаних змін успішно пройшли на Ubuntu, Windows і macOS.
 
-https://github.com/igorok-1715/kzplab01-mishchenko/actions
-
-Pull Requests базового та інженерного рівнів об'єднано з основною гілкою main.
-
-Для завершення повного циклу необхідно підтвердити фінальні автоматичні перевірки та створити Git-тег v3.0.0.
+Під час остаточної локальної перевірки виконано 79 автоматизованих тестів. Статичний аналіз SpotBugs не виявив дефектів. Збірка Maven завершилася успішно.
 
 ## 12. Порівняння Lab 2 і Lab 3
 

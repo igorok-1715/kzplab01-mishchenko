@@ -51,7 +51,7 @@ public abstract sealed class Parcel
      * Захист від перевизначення фіналізатора підтипами.
      */
     @Override
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings("removal")
     protected final void finalize() {
         // Фіналізація не використовується.
     }
