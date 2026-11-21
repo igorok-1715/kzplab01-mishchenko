@@ -1,7 +1,7 @@
-
 package ua.lpnu.kzp;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Базовий клас посилки.
@@ -146,6 +146,50 @@ public sealed class Parcel
         return express
                 ? 100.0 + weightKg * 20.0
                 : 50.0 + weightKg * 10.0;
+    }
+
+    /**
+     * Перевіряє логічну рівність посилок.
+     *
+     * @param obj об'єкт для порівняння
+     * @return true, якщо об'єкти логічно рівні
+     */
+    @Override
+    public final boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Parcel other = (Parcel) obj;
+
+        return Double.compare(weightKg, other.weightKg) == 0
+                && deliveryDays == other.deliveryDays
+                && express == other.express
+                && id.equals(other.id)
+                && city.equals(other.city);
+    }
+
+    /**
+     * Обчислює хеш-код посилки.
+     * Використовує ті самі поля, що й equals().
+     *
+     * @return хеш-код об'єкта
+     */
+    @Override
+    public final int hashCode() {
+        return Objects.hash(
+                getClass(),
+                id,
+                weightKg,
+                city,
+                deliveryDays,
+                express
+        );
     }
 
     /**
