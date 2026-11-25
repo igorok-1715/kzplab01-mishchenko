@@ -5,11 +5,13 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.DoubleSummaryStatistics;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Тестування базових запитів Stream API.
+ * Тестування базових та інженерних запитів Stream API.
  * Варіант 15 — Доставлення посилок.
  */
 class ParcelQueriesTest {
@@ -29,6 +31,8 @@ class ParcelQueriesTest {
                         "15x10x5", ParcelStatus.IN_TRANSIT)
         );
     }
+
+    // Рівень 1 — базові тести
 
     @Test
     void filterInTransitReturnsCorrectParcels() {
@@ -84,6 +88,195 @@ class ParcelQueriesTest {
     void countByCityHandlesEmptyInput() {
         assertTrue(
                 ParcelQueries.countByCity(List.of()).isEmpty()
+        );
+    }
+
+    // Рівень 2 — інженерні тести
+
+    /**
+     * Перевірка статистичних показників ваги.
+     */
+    @Test
+    void weightStatisticsReturnsCorrectValues() {
+        DoubleSummaryStatistics stats =
+                ParcelQueries.weightStatistics(createParcels());
+
+        assertEquals(3, stats.getCount());
+        assertEquals(13.3, stats.getSum(), 0.001);
+        assertEquals(0.8, stats.getMin(), 0.001);
+        assertEquals(10.0, stats.getMax(), 0.001);
+        assertEquals(13.3 / 3, stats.getAverage(), 0.001);
+    }
+
+    /**
+     * Перевірка статистики порожньої колекції.
+     */
+    @Test
+    void weightStatisticsHandlesEmptyInput() {
+        DoubleSummaryStatistics stats =
+                ParcelQueries.weightStatistics(List.of());
+
+        assertEquals(0, stats.getCount());
+        assertEquals(0.0, stats.getSum(), 0.001);
+        assertEquals(0.0, stats.getAverage(), 0.001);
+        assertEquals(Double.POSITIVE_INFINITY, stats.getMin());
+        assertEquals(Double.NEGATIVE_INFINITY, stats.getMax());
+    }
+
+    /**
+     * Перевірка групування повторюваних записів.
+     */
+    @Test
+    void countByCityHandlesDuplicates() {
+        Parcel parcel = createParcels().get(0);
+
+        List<Parcel> parcels = List.of(
+                parcel,
+                parcel,
+                createParcels().get(1)
+        );
+
+        assertEquals(
+                Map.of("Львів", 2L, "Київ", 1L),
+                ParcelQueries.countByCity(parcels)
+        );
+    }
+
+    /**
+     * Перевірка сортування за спаданням ваги.
+     */
+    @Test
+    void topByWeightReturnsCorrectOrder() {
+        List<Parcel> result =
+                ParcelQueries.topByWeight(createParcels(), 5);
+
+        assertEquals(
+                List.of("P002", "P001", "P003"),
+                result.stream()
+                        .map(Parcel::getId)
+                        .toList()
+        );
+    }
+
+    /**
+     * Перевірка сортування за номером
+     * при однаковій вазі посилок.
+     */
+    @Test
+    void topByWeightSortsByIdWhenWeightsAreEqual() {
+        List<Parcel> parcels = List.of(
+                new RegularParcel(
+                        "P003", 5.0, "Львів", 2,
+                        "20x15x10", ParcelStatus.IN_TRANSIT),
+
+                new RegularParcel(
+                        "P001", 5.0, "Київ", 2,
+                        "20x15x10", ParcelStatus.IN_TRANSIT),
+
+                new RegularParcel(
+                        "P002", 5.0, "Одеса", 2,
+                        "20x15x10", ParcelStatus.IN_TRANSIT)
+        );
+
+        List<Parcel> result =
+                ParcelQueries.topByWeight(parcels, 3);
+
+        assertEquals(
+                List.of("P001", "P002", "P003"),
+                result.stream()
+                        .map(Parcel::getId)
+                        .toList()
+        );
+    }
+
+    /**
+     * Перевірка граничного значення N = 0.
+     */
+    @Test
+    void topByWeightHandlesZeroLimit() {
+        assertTrue(
+                ParcelQueries.topByWeight(createParcels(), 0)
+                        .isEmpty()
+        );
+    }
+
+    /**
+     * Перевірка граничного значення N = 1.
+     */
+    @Test
+    void topByWeightHandlesSingleLimit() {
+        List<Parcel> result =
+                ParcelQueries.topByWeight(createParcels(), 1);
+
+        assertEquals(1, result.size());
+        assertEquals("P002", result.get(0).getId());
+    }
+
+    /**
+     * Перевірка N, більшого за розмір колекції.
+     */
+    @Test
+    void topByWeightHandlesLimitGreaterThanSize() {
+        List<Parcel> result =
+                ParcelQueries.topByWeight(createParcels(), 10);
+
+        assertEquals(3, result.size());
+    }
+
+    /**
+     * Перевірка від'ємного значення N.
+     */
+    @Test
+    void topByWeightRejectsNegativeLimit() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ParcelQueries.topByWeight(createParcels(), -1)
+        );
+    }
+
+    /**
+     * Перевірка top-N для порожньої колекції.
+     */
+    @Test
+    void topByWeightHandlesEmptyInput() {
+        assertTrue(
+                ParcelQueries.topByWeight(List.of(), 5)
+                        .isEmpty()
+        );
+    }
+
+    /**
+     * Перевірка успішного пошуку посилки.
+     */
+    @Test
+    void findByIdReturnsExistingParcel() {
+        Optional<Parcel> result =
+                ParcelQueries.findById(createParcels(), "P001");
+
+        assertTrue(result.isPresent());
+        assertEquals("P001", result.orElseThrow().getId());
+        assertEquals("Львів", result.orElseThrow().getCity());
+    }
+
+    /**
+     * Перевірка пошуку неіснуючої посилки.
+     */
+    @Test
+    void findByIdReturnsEmptyForMissingParcel() {
+        Optional<Parcel> result =
+                ParcelQueries.findById(createParcels(), "P999");
+
+        assertTrue(result.isEmpty());
+    }
+
+    /**
+     * Перевірка пошуку в порожній колекції.
+     */
+    @Test
+    void findByIdHandlesEmptyInput() {
+        assertTrue(
+                ParcelQueries.findById(List.of(), "P001")
+                        .isEmpty()
         );
     }
 }
