@@ -1,6 +1,6 @@
-P001;2.5;Львів;2;true
-P002;10.0;Київ;4;false
-P003;0.8;Одеса;3;true
+P001;2.5;Львів;2;true;20x15x10;IN_TRANSIT
+P002;10.0;Київ;4;false;50x40x30;DELIVERED
+P003;0.8;Одеса;3;true;15x10x5;IN_TRANSIT
 P004;abc;Харків;5;false
 P005;-3.0;Дніпро;2;true
 ;4.0;Львів;3;false

@@ -1,5 +1,4 @@
 package ua.lpnu.kzp;
-
 import java.util.Locale;
 import java.util.Objects;
 
@@ -11,18 +10,32 @@ public abstract sealed class Parcel
         permits RegularParcel, ExpressParcel {
 
     private static final int FIELD_COUNT = 5;
+    private static final int EXTENDED_FIELD_COUNT = 7;
 
     private final String id;
     private final double weightKg;
     private final String city;
     private final int deliveryDays;
     private final boolean express;
+    private final String dimensions;
+    private final ParcelStatus status;
 
     /**
-     * Створює посилку та перевіряє коректність даних.
+     * Створює посилку зі старим набором полів.
      */
     protected Parcel(String id, double weightKg, String city,
-                 int deliveryDays, boolean express) {
+                     int deliveryDays, boolean express) {
+
+        this(id, weightKg, city, deliveryDays, express,
+                "UNKNOWN", ParcelStatus.UNKNOWN);
+    }
+
+    /**
+     * Створює посилку з габаритами та статусом.
+     */
+    protected Parcel(String id, double weightKg, String city,
+                     int deliveryDays, boolean express,
+                     String dimensions, ParcelStatus status) {
 
         if (id == null || id.isBlank()
                 || city == null || city.isBlank()) {
@@ -40,11 +53,23 @@ public abstract sealed class Parcel
                     "від'ємне числове значення");
         }
 
+        if (dimensions == null || dimensions.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Не вказано габарити");
+        }
+
+        if (status == null) {
+            throw new IllegalArgumentException(
+                    "Не вказано статус");
+        }
+
         this.id = id;
         this.weightKg = weightKg;
         this.city = city;
         this.deliveryDays = deliveryDays;
         this.express = express;
+        this.dimensions = dimensions;
+        this.status = status;
     }
 
     /**
@@ -59,42 +84,61 @@ public abstract sealed class Parcel
     /**
      * Перетворює CSV-рядок на відповідний підтип Parcel.
      */
+    
     public static Parcel fromCsv(String line) {
 
-        if (line == null || line.isBlank()) {
-            throw new IllegalArgumentException("порожній рядок");
-        }
-
-        String[] f = line.split(";", -1);
-
-        if (f.length != FIELD_COUNT) {
-            throw new IllegalArgumentException(
-                    "очікується %d полів, отримано %d"
-                            .formatted(FIELD_COUNT, f.length));
-        }
-
-        if (!"true".equals(f[4]) && !"false".equals(f[4])) {
-            throw new IllegalArgumentException(
-                    "express має бути true або false");
-        }
-
-        try {
-            double weight = Double.parseDouble(f[1]);
-            int days = Integer.parseInt(f[3]);
-
-            if (Boolean.parseBoolean(f[4])) {
-                return new ExpressParcel(
-                        f[0], weight, f[2], days);
-            }
-
-            return new RegularParcel(
-                    f[0], weight, f[2], days);
-
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                    "числове поле має помилковий формат", e);
-        }
+    if (line == null || line.isBlank()) {
+        throw new IllegalArgumentException("порожній рядок");
     }
+
+    String[] f = line.split(";", -1);
+
+    if (f.length != FIELD_COUNT
+            && f.length != EXTENDED_FIELD_COUNT) {
+
+        throw new IllegalArgumentException(
+                "очікується %d полів, отримано %d"
+                        .formatted(FIELD_COUNT, f.length));
+    }
+
+    if (!"true".equals(f[4]) && !"false".equals(f[4])) {
+        throw new IllegalArgumentException(
+                "express має бути true або false");
+    }
+
+    try {
+        double weight = Double.parseDouble(f[1]);
+        int days = Integer.parseInt(f[3]);
+
+        String dimensions = "UNKNOWN";
+        ParcelStatus status = ParcelStatus.UNKNOWN;
+
+        if (f.length == EXTENDED_FIELD_COUNT) {
+            dimensions = f[5];
+
+            try {
+                status = ParcelStatus.valueOf(f[6]);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(
+                        "некоректний статус посилки", e);
+            }
+        }
+
+        if (Boolean.parseBoolean(f[4])) {
+            return new ExpressParcel(
+                    f[0], weight, f[2], days,
+                    dimensions, status);
+        }
+
+        return new RegularParcel(
+                f[0], weight, f[2], days,
+                dimensions, status);
+
+    } catch (NumberFormatException e) {
+        throw new IllegalArgumentException(
+                "числове поле має помилковий формат", e);
+    }
+}
 
     /**
      * Повертає вагу та термін доставлення.
@@ -123,21 +167,34 @@ public abstract sealed class Parcel
         return express;
     }
 
-   /**
-   * Повертає вид доставлення.
-   */
-   public abstract DeliveryKind getDeliveryKind();
+    /**
+     * Повертає габарити посилки.
+     */
+    public String getDimensions() {
+        return dimensions;
+    }
 
-   /**
-   * Розраховує термін доставлення.
-   */
-   public abstract int calculateDeliveryTime();
+    /**
+     * Повертає статус доставлення.
+     */
+    public ParcelStatus getStatus() {
+        return status;
+    }
 
-   /**
-   * Розраховує вартість доставлення.
-   */
-   public abstract double calculateDeliveryCost();
-    
+    /**
+     * Повертає вид доставлення.
+     */
+    public abstract DeliveryKind getDeliveryKind();
+
+    /**
+     * Розраховує термін доставлення.
+     */
+    public abstract int calculateDeliveryTime();
+
+    /**
+     * Розраховує вартість доставлення.
+     */
+    public abstract double calculateDeliveryCost();
 
     /**
      * Перевіряє логічну рівність посилок.
@@ -162,7 +219,9 @@ public abstract sealed class Parcel
                 && deliveryDays == other.deliveryDays
                 && express == other.express
                 && id.equals(other.id)
-                && city.equals(other.city);
+                && city.equals(other.city)
+                && dimensions.equals(other.dimensions)
+                && status == other.status;
     }
 
     /**
@@ -179,7 +238,9 @@ public abstract sealed class Parcel
                 weightKg,
                 city,
                 deliveryDays,
-                express
+                express,
+                dimensions,
+                status
         );
     }
 
@@ -238,6 +299,7 @@ public abstract sealed class Parcel
         }
 
         public Parcel build() {
+
             if (weightKg == null || deliveryDays == null) {
                 throw new IllegalArgumentException(
                         "Не вказано вагу або термін доставки");

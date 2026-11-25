@@ -1,3 +1,4 @@
+
 package ua.lpnu.kzp;
 
 /**
@@ -7,7 +8,16 @@ public final class RegularParcel extends Parcel {
 
     public RegularParcel(String id, double weightKg,
                          String city, int deliveryDays) {
+
         super(id, weightKg, city, deliveryDays, false);
+    }
+
+    public RegularParcel(String id, double weightKg,
+                         String city, int deliveryDays,
+                         String dimensions, ParcelStatus status) {
+
+        super(id, weightKg, city, deliveryDays,
+                false, dimensions, status);
     }
 
     @Override

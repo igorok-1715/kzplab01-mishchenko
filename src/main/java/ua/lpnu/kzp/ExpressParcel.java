@@ -1,3 +1,4 @@
+
 package ua.lpnu.kzp;
 
 /**
@@ -7,7 +8,16 @@ public final class ExpressParcel extends Parcel {
 
     public ExpressParcel(String id, double weightKg,
                          String city, int deliveryDays) {
+
         super(id, weightKg, city, deliveryDays, true);
+    }
+
+    public ExpressParcel(String id, double weightKg,
+                         String city, int deliveryDays,
+                         String dimensions, ParcelStatus status) {
+
+        super(id, weightKg, city, deliveryDays,
+                true, dimensions, status);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package ua.lpnu.kzp;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Формує звіт про посилки (варіант 15). Розбір і перевірку рядків виконує {@link Parcel},
@@ -46,6 +46,9 @@ public final class ParcelReport {
         }
         int validCount = parcels.size();
         double avgWeight = validCount == 0 ? 0.0 : totalWeight / validCount;
+        List<Parcel> inTransit = ParcelQueries.filterInTransit(parcels);
+        List<String> cities = ParcelQueries.mapCities(parcels);
+        Map<String, Long> cityCounts = ParcelQueries.countByCity(parcels);
 
         StringBuilder sb = new StringBuilder();
         sb.append(String.format(Locale.ROOT, "Коректних записів: %d%n", validCount));
@@ -59,6 +62,26 @@ public final class ParcelReport {
         if (validCount == 0) {
             sb.append(String.format("Увага: немає жодного коректного запису%n"));
         }
+        sb.append("\nРезультати Stream API:\n");
+        sb.append("Посилки у дорозі:\n");
+        for (Parcel parcel : inTransit) {
+            sb.append(parcel.getId())
+            .append(" — ")
+            .append(parcel.getCity())
+            .append("\n");
+        }
+        
+        sb.append("Міста доставлення: ")
+        .append(cities)
+        .append("\n");
+        sb.append("Кількість посилок за містом:\n");
+        
+        cityCounts.forEach((city, count) ->
+        sb.append(city)
+                .append(": ")
+                .append(count)
+                .append("\n"));
+        
         return sb.toString();
     }
 }
