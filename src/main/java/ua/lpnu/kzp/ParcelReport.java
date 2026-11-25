@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.DoubleSummaryStatistics;
+import java.util.Optional;
 
 /**
  * Формує звіт про посилки (варіант 15). Розбір і перевірку рядків виконує {@link Parcel},
@@ -49,6 +51,9 @@ public final class ParcelReport {
         List<Parcel> inTransit = ParcelQueries.filterInTransit(parcels);
         List<String> cities = ParcelQueries.mapCities(parcels);
         Map<String, Long> cityCounts = ParcelQueries.countByCity(parcels);
+        DoubleSummaryStatistics stats = ParcelQueries.weightStatistics(parcels);
+        List<Parcel> top5 = ParcelQueries.topByWeight(parcels, 5);
+        Optional<Parcel> foundParcel = ParcelQueries.findById(parcels, "P001");
 
         StringBuilder sb = new StringBuilder();
         sb.append(String.format(Locale.ROOT, "Коректних записів: %d%n", validCount));
@@ -81,7 +86,46 @@ public final class ParcelReport {
                 .append(": ")
                 .append(count)
                 .append("\n"));
-        
+        sb.append("\nСтатистика за вагою посилок:\n");
+
+        sb.append(String.format(Locale.ROOT,
+                "Кількість: %d%n", stats.getCount()));
+
+        sb.append(String.format(Locale.ROOT,
+                "Сумарна вага: %.2f кг%n", stats.getSum()));
+
+        sb.append(String.format(Locale.ROOT,
+                "Мінімальна вага: %.2f кг%n",
+                stats.getCount() == 0 ? 0.0 : stats.getMin()));
+
+        sb.append(String.format(Locale.ROOT,
+                "Максимальна вага: %.2f кг%n",
+                stats.getCount() == 0 ? 0.0 : stats.getMax()));
+
+        sb.append(String.format(Locale.ROOT,
+                "Середня вага: %.2f кг%n", stats.getAverage()));
+
+        sb.append("\nTop-5 посилок за вагою:\n");
+
+        for (Parcel parcel : top5) {
+            sb.append(String.format(Locale.ROOT,
+                    "%s — %s — %.2f кг%n",
+                    parcel.getId(),
+                    parcel.getCity(),
+                    parcel.getWeightKg()));
+        }
+
+        sb.append("\nПошук посилки за номером P001:\n");
+
+        foundParcel.ifPresentOrElse(
+                parcel -> sb.append("Посилку знайдено: ")
+                        .append(parcel.getId())
+                        .append(" — ")
+                        .append(parcel.getCity())
+                        .append("\n"),
+                () -> sb.append("Посилку не знайдено.\n")
+        );
+
         return sb.toString();
     }
 }
