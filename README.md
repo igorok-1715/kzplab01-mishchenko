@@ -945,3 +945,585 @@ Switch не дублює логіку calculateDeliveryTime() та calculateDeli
 - кількість тестів збільшено до 79;
 - збережено результати попередньої роботи;
 - версію оновлено до 3.0.0.
+
+---
+
+# Лабораторна робота №4
+
+**Дисципліна:** Кросплатформні засоби програмування  
+**Варіант:** №15  
+**Предметна область:** Доставлення посилок  
+**Java:** 21  
+**Версія:** 4.0.0  
+**Гілка:** lab4-level3
+
+## Мета роботи
+
+Реалізувати основні операції обробки поліморфної колекції `List<Parcel>` із використанням Java Stream API зі збереженням попередніх контрольних показників програми.
+
+Предметну модель розширено полями габаритів та статусу доставлення.
+
+Збережено підтримку попереднього формату вхідного запису:
+
+```text
+id;weightKg;city;deliveryDays;express
+```
+
+Додано підтримку розширеного формату CSV:
+
+```text
+id;weightKg;city;deliveryDays;express;dimensions;status
+```
+
+## Реалізовані Stream API запити
+
+Для потокової обробки створено окремий клас `ParcelQueries`.
+
+Реалізовано п'ять основних запитів та окремий Optional-пошук:
+
+| Метод | Призначення |
+|---|---|
+| `filterInTransit()` | Відбір посилок зі статусом «у дорозі» |
+| `mapCities()` | Перетворення посилок у список міст доставлення |
+| `countByCity()` | Групування посилок за містом із визначенням їх кількості |
+| `weightStatistics()` | Статистика ваги через `DoubleSummaryStatistics` |
+| `topByWeight()` | Top-N за вагою та номером посилки |
+| `findById()` | Пошук посилки за номером через `Optional` |
+
+Усі запити працюють через спільний тип:
+
+```java
+List<Parcel>
+```
+
+Запити не містять `if` або `switch` за конкретним підтипом посилки.
+
+## Основні запити
+
+### Filter
+
+```java
+parcels.stream()
+        .filter(p -> p.getStatus() == ParcelStatus.IN_TRANSIT)
+        .toList();
+```
+
+До результату входять лише посилки зі статусом `IN_TRANSIT`.
+
+### Map
+
+```java
+parcels.stream()
+        .map(Parcel::getCity)
+        .toList();
+```
+
+Результат:
+
+```java
+List<String>
+```
+
+### Grouping
+
+```java
+parcels.stream()
+        .collect(Collectors.groupingBy(
+                Parcel::getCity,
+                Collectors.counting()
+        ));
+```
+
+Результат:
+
+```java
+Map<String, Long>
+```
+
+### Statistics
+
+```java
+parcels.stream()
+        .mapToDouble(Parcel::getWeightKg)
+        .summaryStatistics();
+```
+
+Результат:
+
+```java
+DoubleSummaryStatistics
+```
+
+Обчислюються:
+
+- `count` — кількість посилок;
+- `sum` — сумарна вага;
+- `min` — мінімальна вага;
+- `max` — максимальна вага;
+- `average` — середня вага.
+
+Для порожньої колекції:
+
+```text
+count = 0
+sum = 0.0
+average = 0.0
+min = Infinity
+max = -Infinity
+```
+
+### Top-N
+
+Компаратор:
+
+```java
+Comparator.comparingDouble(Parcel::getWeightKg)
+        .reversed()
+        .thenComparing(Parcel::getId)
+```
+
+Порядок:
+
+- вага — за спаданням;
+- при однаковій вазі номер посилки — за зростанням;
+- після сортування застосовується `limit(n)`.
+
+Перевірено:
+
+- `n = 0`;
+- `n = 1`;
+- `n > size`;
+- `n < 0` → `IllegalArgumentException`;
+- однакові значення ваги;
+- порожню колекцію.
+
+### Optional
+
+```java
+parcels.stream()
+        .filter(p -> p.getId().equals(id))
+        .findFirst();
+```
+
+Результат:
+
+```java
+Optional<Parcel>
+```
+
+Якщо посилка відсутня:
+
+```java
+Optional.empty()
+```
+
+Якщо номер дублюється, `findFirst()` повертає перший запис у початковому порядку.
+
+## Stream API у ParcelReport
+
+У Lab 3 підсумкові значення обчислювалися вручну в циклі `for`.
+
+У Lab 4 до класу `ParcelReport` інтегровано запити Stream API:
+
+```java
+List<Parcel> inTransit =
+        ParcelQueries.filterInTransit(parcels);
+
+List<String> cities =
+        ParcelQueries.mapCities(parcels);
+
+Map<String, Long> cityCounts =
+        ParcelQueries.countByCity(parcels);
+
+DoubleSummaryStatistics stats =
+        ParcelQueries.weightStatistics(parcels);
+
+List<Parcel> top5 =
+        ParcelQueries.topByWeight(parcels, 5);
+
+Optional<Parcel> foundParcel =
+        ParcelQueries.findById(parcels, "P001");
+```
+
+Попередні контрольні показники залишено незмінними, а звіт доповнено результатами Stream API.
+
+Цикл читання CSV залишено, оскільки він відповідає за нумерацію рядків та окрему обробку помилок.
+
+## Контрольний набір Lab 4
+
+Для перевірки Stream API використано:
+
+```text
+data/input.csv
+```
+
+Набір містить 8 записів, із яких 3 коректні та 5 помилкових.
+
+Коректні записи:
+
+| Номер | Вага, кг | Місто | Термін, дн. | Експрес | Статус |
+|---|---:|---|---:|---|---|
+| P001 | 2.5 | Львів | 2 | true | IN_TRANSIT |
+| P002 | 10.0 | Київ | 4 | false | DELIVERED |
+| P003 | 0.8 | Одеса | 3 | true | IN_TRANSIT |
+
+Додатковими тестами перевірено:
+
+- дублікати;
+- порожні колекції;
+- однакові значення ваги;
+- граничні значення N;
+- відсутній ключ для `Optional.empty()`.
+
+**Filter:**
+
+```text
+Посилки у дорозі:
+P001 — Львів
+P003 — Одеса
+```
+
+**Map:**
+
+```text
+[Львів, Київ, Одеса]
+```
+
+**Grouping:**
+
+```text
+Одеса: 1
+Львів: 1
+Київ: 1
+```
+
+**Statistics:**
+
+```text
+count = 3
+sum = 13.30
+min = 0.80
+max = 10.00
+average = 4.43
+```
+
+**Top-5:**
+
+```text
+P002 — Київ — 10.00 кг
+P001 — Львів — 2.50 кг
+P003 — Одеса — 0.80 кг
+```
+
+Оскільки набір містить три коректні записи, top-5 повертає всі три посилки.
+
+**Optional:**
+
+```text
+P001 -> Посилку знайдено: P001 — Львів
+P999 -> Optional.empty()
+```
+
+## Додаткове завдання ⭐
+
+Реалізовано дворівневе групування:
+
+```java
+Map<ParcelStatus, Map<String, Double>>
+```
+
+Через:
+
+```java
+Collectors.groupingBy(
+        Parcel::getStatus,
+        Collectors.groupingBy(
+                Parcel::getCity,
+                Collectors.summingDouble(Parcel::getWeightKg)
+        )
+);
+```
+
+Перший рівень — `ParcelStatus`, другий — місто доставлення.
+
+Для кожної групи обчислюється сумарна вага посилок.
+
+Результат:
+
+```text
+Дворівневе групування посилок:
+Статус: IN_TRANSIT
+  Одеса: 0.80 кг
+  Львів: 2.50 кг
+Статус: DELIVERED
+  Київ: 10.00 кг
+```
+
+Також додано окремий тест, який перевіряє, що Stream-запити не змінюють вхідну колекцію.
+
+## Еквівалентність Lab 3 і Lab 4
+
+### Порівняння «Цикли → Stream API»
+
+| Обчислення | Цикловий стиль | Stream API |
+|---|---|---|
+| Сумарна вага | Накопичення у циклі `for` | `DoubleSummaryStatistics.getSum()` |
+| Середня вага | Сума / кількість | `DoubleSummaryStatistics.getAverage()` |
+| Мінімальна вага | `Math.min()` | `DoubleSummaryStatistics.getMin()` |
+| Максимальна вага | `Math.max()` | `DoubleSummaryStatistics.getMax()` |
+| Фільтрація | `if` у циклі | `filter()` |
+| Перетворення | Ручне формування списку | `map()` |
+| Групування | Ручна робота з `Map` | `groupingBy()` |
+| Top-N | Сортування й обрізання | `sorted()` + `limit()` |
+| Пошук | Цикл / `null` | `findFirst()` + `Optional` |
+
+Контрольні показники Lab 3 збережено:
+
+| Показник | Lab 3 | Lab 4 |
+|---|---:|---:|
+| Кількість коректних записів | 3 | 3 |
+| Середня вага | 4.43 кг | 4.43 кг |
+| Найбільший термін | 4 дн. | 4 дн. |
+| Експрес-доставлення | 2 | 2 |
+| Помилки | 5 | 5 |
+
+Результат:
+
+```text
+Коректних записів: 3
+Середня вага: 4.43 кг
+Найбільший термін: 4 дн.
+Експрес-доставлень: 2
+Помилок: 5
+```
+
+Попередні контрольні показники не змінилися. Звіт доповнено результатами Stream API.
+
+## Тестування
+
+До Lab 4:
+
+```text
+79 тестів
+```
+
+Після Lab 4:
+
+```text
+Tests run: 101, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+| Етап | Додано тестів | Загальна кількість |
+|---|---:|---:|
+| Lab 3 | — | 79 |
+| Рівень 1 | 6 | 85 |
+| Рівень 2 | 13 | 98 |
+| Завдання із зірочкою | 3 | 101 |
+
+Перевірено:
+
+- усі 5 Stream API запитів;
+- порожні колекції;
+- фільтрацію за статусом;
+- дублікати;
+- статистику;
+- top-N;
+- сортування за номером при однаковій вазі;
+- `n = 0`;
+- `n = 1`;
+- завелике N;
+- від'ємне N;
+- знайдений та відсутній Optional;
+- відсутність мутації;
+- дворівневе `groupingBy`;
+- усі попередні тести Lab 1–3.
+
+## Maven, SpotBugs і JAR
+
+**Тести:**
+
+```powershell
+.\mvnw.cmd test
+```
+
+**Повна перевірка:**
+
+```powershell
+.\mvnw.cmd clean verify
+```
+
+**Пакування:**
+
+```powershell
+.\mvnw.cmd package
+```
+
+Результат:
+
+```text
+Tests run: 101, Failures: 0, Errors: 0, Skipped: 0
+BugInstance size is 0
+Error size is 0
+No errors/warnings found
+BUILD SUCCESS
+```
+
+**JAR:**
+
+```text
+target/lab01-4.0.0.jar
+```
+
+**Запуск:**
+
+```powershell
+java -jar target\lab01-4.0.0.jar --input data\input.csv --output out\report-lab4.txt
+```
+
+Запуск із кодуванням UTF-8:
+
+```powershell
+java "-Dfile.encoding=UTF-8" "-Dstdout.encoding=UTF-8" "-Dstderr.encoding=UTF-8" -jar target/lab01-4.0.0.jar
+```
+
+**Версія:**
+
+```powershell
+java -jar target\lab01-4.0.0.jar --version
+```
+
+Результат:
+
+```text
+lab01 4.0.0
+```
+
+## Автоматичне версіонування
+
+Єдине джерело версії:
+
+```text
+pom.xml
+```
+
+Версія проєкту:
+
+```xml
+<version>4.0.0</version>
+```
+
+Maven автоматично підставляє версію з `pom.xml` до маніфесту JAR:
+
+```xml
+<Implementation-Version>${project.version}</Implementation-Version>
+```
+
+У класі `Main` версія отримується через:
+
+```java
+Main.class.getPackage().getImplementationVersion()
+```
+
+Ім'я JAR формується автоматично:
+
+```xml
+<finalName>${project.artifactId}-${project.version}</finalName>
+```
+
+У CI версія визначається через:
+
+```text
+project.version
+```
+
+Отримане значення використовується для перевірки `--version`, відповідності Git-тегу та завантаження JAR artifact.
+
+## GitHub Actions
+
+CI налаштовано на трьох операційних системах:
+
+- Ubuntu — `ubuntu-latest`;
+- Windows — `windows-latest`;
+- macOS — `macos-latest`.
+
+На кожній операційній системі передбачено:
+
+- встановлення Java 21;
+- використання Maven Wrapper;
+- виконання `clean verify`;
+- запуск усіх модульних тестів;
+- статичний аналіз коду через SpotBugs;
+- автоматичне визначення версії проєкту;
+- перевірку результату `--version`;
+- перевірку відповідності Git-тегу версії проєкту;
+- завантаження виконуваного JAR як GitHub Actions artifact.
+
+Повний успішний matrix-run створює:
+
+```text
+3 JAR artifacts
+```
+
+Очікуваний результат перевірки версії:
+
+```text
+lab01 4.0.0
+```
+
+Віддалені перевірки рівнів 1 та 2 пройдено успішно.
+
+Фінальна локальна перевірка версії 4.0.0 із 101 тестом
+завершилася успішно. Фінальна віддалена перевірка
+ще не виконана.
+
+## GitHub Issues
+
+Для Lab 4 створено такі Issues:
+
+- **#47** — Lab 4 Level 1: Basic Stream API queries and tests;
+- **#49** — Lab 4 Level 2: Advanced Stream API queries, Optional and engineering tests;
+- **#51** — Lab 4 Level 3: Full CI cycle, documentation and release 4.0.0.
+
+Фінальний Pull Request передбачає об'єднання гілок:
+
+```text
+lab4-level3 -> main
+```
+
+В описі фінального Pull Request:
+
+```text
+Closes #51
+```
+
+Після успішного проходження перевірок та merge
+буде створено Git-тег:
+
+```text
+v4.0.0
+```
+
+## Підсумок
+
+У Lab 4:
+
+- реалізовано всі 5 обов'язкових запитів Stream API;
+- реалізовано пошук посилки за номером через `Optional`;
+- інтегровано запити Stream API до класу `ParcelReport`;
+- розширено предметну модель габаритами та статусом доставлення;
+- реалізовано групування посилок за містом із визначенням їх кількості;
+- реалізовано обчислення статистичних показників за вагою посилок;
+- реалізовано top-5 посилок за спаданням ваги;
+- другий критерій top-N працює за номером посилки;
+- додано тести для граничних значень N;
+- реалізовано дворівневе `groupingBy` ⭐;
+- перевірено відсутність мутації вхідної колекції ⭐;
+- кількість тестів збільшено з 79 до 101;
+- усі попередні та нові тести проходять успішно;
+- SpotBugs не виявляє дефектів;
+- контрольні показники Lab 3 збережено;  
+- `pom.xml` є єдиним джерелом версії проєкту;
+- CI налаштовано на Ubuntu, Windows і macOS;
+- налаштовано публікацію 3 JAR artifacts.
+- версію проєкту оновлено до 4.0.0;

@@ -54,6 +54,8 @@ public final class ParcelReport {
         DoubleSummaryStatistics stats = ParcelQueries.weightStatistics(parcels);
         List<Parcel> top5 = ParcelQueries.topByWeight(parcels, 5);
         Optional<Parcel> foundParcel = ParcelQueries.findById(parcels, "P001");
+        Map<ParcelStatus, Map<String, Double>> groupedWeights =
+        ParcelQueries.groupWeightByStatusAndCity(parcels);
 
         StringBuilder sb = new StringBuilder();
         sb.append(String.format(Locale.ROOT, "Коректних записів: %d%n", validCount));
@@ -125,6 +127,18 @@ public final class ParcelReport {
                         .append("\n"),
                 () -> sb.append("Посилку не знайдено.\n")
         );
+
+        sb.append("\nДворівневе групування посилок:\n");
+
+        groupedWeights.forEach((status, cityWeights) -> {
+        sb.append("Статус: ")
+            .append(status)
+            .append("\n");
+
+        cityWeights.forEach((city, weight) ->
+            sb.append(String.format(Locale.ROOT,
+                    "  %s: %.2f кг%n", city, weight)));
+        });
 
         return sb.toString();
     }
