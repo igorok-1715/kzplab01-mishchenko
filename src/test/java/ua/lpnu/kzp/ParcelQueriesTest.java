@@ -1,8 +1,8 @@
-
 package ua.lpnu.kzp;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.DoubleSummaryStatistics;
@@ -11,7 +11,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Тестування базових та інженерних запитів Stream API.
+ * Тестування базових та інженерних запитів Stream API
+ * і дворівневого групування.
  * Варіант 15 — Доставлення посилок.
  */
 class ParcelQueriesTest {
@@ -278,5 +279,74 @@ class ParcelQueriesTest {
                 ParcelQueries.findById(List.of(), "P001")
                         .isEmpty()
         );
+    }
+
+    // Завдання із зірочкою — дворівневе групування
+
+    /**
+     * Перевірка групування за статусом та містом
+     * з обчисленням сумарної ваги посилок.
+     */
+    @Test
+    void groupWeightByStatusAndCityReturnsCorrectValues() {
+        List<Parcel> parcels =
+                new ArrayList<>(createParcels());
+
+        parcels.add(new RegularParcel(
+                "P004", 3.5, "Львів", 3,
+                "30x20x10", ParcelStatus.IN_TRANSIT));
+
+        parcels.add(new RegularParcel(
+                "P005", 4.0, "Львів", 2,
+                "25x20x15", ParcelStatus.DELIVERED));
+
+        Map<ParcelStatus, Map<String, Double>> result =
+                ParcelQueries.groupWeightByStatusAndCity(parcels);
+
+        assertEquals(
+                Map.of(
+                        ParcelStatus.IN_TRANSIT,
+                        Map.of(
+                                "Львів", 6.0,
+                                "Одеса", 0.8
+                        ),
+
+                        ParcelStatus.DELIVERED,
+                        Map.of(
+                                "Київ", 10.0,
+                                "Львів", 4.0
+                        )
+                ),
+                result
+        );
+    }
+
+    /**
+     * Перевірка дворівневого групування
+     * для порожньої колекції.
+     */
+    @Test
+    void groupWeightByStatusAndCityHandlesEmptyInput() {
+        assertTrue(
+                ParcelQueries.groupWeightByStatusAndCity(
+                        List.of()).isEmpty()
+        );
+    }
+
+    /**
+     * Перевірка відсутності мутації вхідної колекції.
+     */
+    @Test
+    void groupWeightByStatusAndCityDoesNotMutateInput() {
+        List<Parcel> parcels =
+                new ArrayList<>(createParcels());
+
+        List<Parcel> original =
+                new ArrayList<>(parcels);
+
+        ParcelQueries.groupWeightByStatusAndCity(parcels);
+
+        assertEquals(original.size(), parcels.size());
+        assertEquals(original, parcels);
     }
 }

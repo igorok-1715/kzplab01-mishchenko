@@ -86,4 +86,22 @@ public final class ParcelQueries {
                 .filter(p -> p.getId().equals(id))
                 .findFirst();
     }
+
+    /**
+    * Групує посилки за статусом доставлення та містом.
+    * Для кожної групи обчислює сумарну вагу посилок.
+    */
+    public static Map<ParcelStatus, Map<String, Double>>
+        groupWeightByStatusAndCity(List<Parcel> parcels) {
+
+    return parcels.stream()
+            .collect(Collectors.groupingBy(
+                    Parcel::getStatus,
+                    Collectors.groupingBy(
+                            Parcel::getCity,
+                            Collectors.summingDouble(
+                                    Parcel::getWeightKg)
+                    )
+            ));
+    }
 }
