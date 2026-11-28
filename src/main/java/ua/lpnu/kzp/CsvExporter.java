@@ -1,19 +1,17 @@
 package ua.lpnu.kzp;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * Універсальний CSV-експортер на основі Reflection API.
- *
- * @param <T> тип об'єктів для експорту
  */
 public final class CsvExporter<T> {
 
@@ -24,8 +22,8 @@ public final class CsvExporter<T> {
     }
 
     /**
-     * Отримує поля з анотацією CsvColumn
-     * у визначеному порядку.
+     * Отримує поля з анотацією @CsvColumn
+     * та сортує їх за порядком колонок.
      */
     private List<Field> getFields() {
         return Arrays.stream(type.getDeclaredFields())
@@ -43,6 +41,7 @@ public final class CsvExporter<T> {
         return getFields().stream()
                 .map(field ->
                         field.getAnnotation(CsvColumn.class).name())
+                .map(this::escape)
                 .collect(Collectors.joining(","));
     }
 
@@ -52,7 +51,23 @@ public final class CsvExporter<T> {
     public String row(T item) {
         return getFields().stream()
                 .map(field -> getValue(field, item))
+                .map(this::escape)
                 .collect(Collectors.joining(","));
+    }
+
+    /**
+     * Екранує спеціальні символи CSV.
+     */
+    private String escape(String value) {
+        if (value.contains(",")
+                || value.contains("\"")
+                || value.contains("\n")
+                || value.contains("\r")) {
+
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+
+        return value;
     }
 
     /**
@@ -61,6 +76,7 @@ public final class CsvExporter<T> {
     private String getValue(Field field, T item) {
         try {
             field.setAccessible(true);
+
             Object value = field.get(item);
 
             return value == null ? "" : value.toString();
@@ -81,26 +97,28 @@ public final class CsvExporter<T> {
                         .map(this::row)
                         .collect(Collectors.joining("\n"));
     }
+
     /**
-    * Записує CSV-документ у файл із кодуванням UTF-8.
-    */
+     * Записує CSV-документ у файл
+     * із явним кодуванням UTF-8.
+     */
     public void exportToFile(List<T> items, Path path) {
-    try {
-        Path parent = path.getParent();
+        try {
+            Path parent = path.getParent();
 
-        if (parent != null) {
-            Files.createDirectories(parent);
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+
+            Files.writeString(
+                    path,
+                    export(items),
+                    StandardCharsets.UTF_8
+            );
+
+        } catch (IOException e) {
+            throw new DataStorageException(
+                    "Помилка запису CSV-файла: " + path, e);
         }
-
-        Files.writeString(
-                path,
-                export(items),
-                StandardCharsets.UTF_8
-        );
-
-    } catch (IOException e) {
-        throw new DataStorageException(
-                "Помилка запису CSV-файла: " + path, e);
-    }
     }
 }
