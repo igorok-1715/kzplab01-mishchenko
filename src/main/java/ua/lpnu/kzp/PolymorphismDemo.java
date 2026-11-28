@@ -1,7 +1,11 @@
+
 package ua.lpnu.kzp;
+
+import java.util.Arrays;
 
 /**
  * Демонстрація поліморфізму для лабораторної №3.
+ * Обробка масиву посилок через Stream API.
  */
 public final class PolymorphismDemo {
 
@@ -18,7 +22,7 @@ public final class PolymorphismDemo {
 
         Parcel[] parcels = {regular, express};
 
-        for (Parcel parcel : parcels) {
+        Arrays.stream(parcels).forEachOrdered(parcel -> {
             System.out.println(
                     "Тип: " + parcel.getDeliveryKind());
 
@@ -29,6 +33,6 @@ public final class PolymorphismDemo {
                     "Вартість: " + parcel.calculateDeliveryCost());
 
             System.out.println();
-        }
+        });
     }
 }
